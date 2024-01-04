@@ -1,111 +1,31 @@
 const express = require('express');
-const mysql = require('mysql');
+
 const bodyParser = require('body-parser');
 const path = require("path")
 const fs = require('fs');
 const { log } = require('console');
 
+const {Donorfeedback}=require("./mongodb")
+
+const {mysql,pool,executeQuery}=require("./mysql")
+
 const app = express();
 const port = 3000;
 const temporaryStorage = [];
 
-
-// MySQL Database connection pool configuration
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: '127.0.0.1',
-    user: 'noob',
-    password: 'noob',
-    database: 'mysql',
-});
-
 // Use middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Create 'doctor' table if not exists
-const createDoctorTableQuery = `
-  CREATE TABLE IF NOT EXISTS doctor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    doctor_name VARCHAR(255),
-    doc_add VARCHAR(255),
-    doc_phno VARCHAR(255)  -- Change data type to VARCHAR
-  )
-`;
-
-// Create 'donor' table if not exists
-const createDonorTableQuery = `
-  CREATE TABLE IF NOT EXISTS donor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    donor_name VARCHAR(255),
-    phone_no VARCHAR(255),
-    DOB DATE,
-    gender VARCHAR(10),
-    address VARCHAR(255),
-    weight FLOAT,
-    blood_pressure FLOAT,
-    iron_content FLOAT,
-    doctor_id INT,
-    FOREIGN KEY (doctor_id) REFERENCES doctor(id)
-  )
-`;
-const createPatientTableQuery = `
-CREATE TABLE IF NOT EXISTS  patient (
-      patient_id INT NOT NULL AUTO_INCREMENT,
-      patient_name VARCHAR(20),
-      p_phno varchar(255),
-      h_add VARCHAR(50),
-      p_add VARCHAR(50),
-     PRIMARY KEY (patient_id)
-    )
-
-  `;
-
-const createBloodBankTableQuery = `
-  CREATE TABLE IF NOT EXISTS blood_bank (
-    blood_bank_id INT NOT NULL AUTO_INCREMENT,
-    blood_bank_name VARCHAR(50),
-    baddress VARCHAR(255),
-    PRIMARY KEY (blood_bank_id)
-  )
-  `;
-
-const createBloodTableQuery = `
-  CREATE TABLE IF NOT EXISTS blood (
-    blood_type VARCHAR(20),
-    donor_id INT,
-    blood_bank_id INT,
-    PRIMARY KEY (donor_id),
-    FOREIGN KEY (donor_id) REFERENCES donor(id),
-    FOREIGN KEY (blood_bank_id) REFERENCES blood_bank(blood_bank_id)
-  )
-  `;
-// const createTableQuery = `
-// CREATE TABLE IF NOT EXISTS blood_delivery (
-//     blood_bank_id INT,
-//     patient_id INT,
-//      PRIMARY KEY (blood_bank_id, patient_id),
-//    FOREIGN KEY (blood_bank_id) REFERENCES blood_bank(blood_bank_id),
-//      FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
-//   )
-// `;
-
-// Execute table creation queries
-executeQuery(createDoctorTableQuery, null, 0);
-executeQuery(createDonorTableQuery, null, 0);
-executeQuery(createBloodBankTableQuery, null, 0);
-executeQuery(createBloodTableQuery, null, 0);
-executeQuery(createPatientTableQuery, null, 0);
-// executeQuery(createTableQuery, null, 0);
 
 
 app.get("/admin", (req, res) => {
-    res.sendFile(__dirname + "/admin.html")
+    res.sendFile(__dirname + "/Front-end/admin.html")
 })
 
 app.get("/donor", (req, res) => {
-    res.sendFile(__dirname + "/donor.html")
+    res.sendFile(__dirname + "/Front-end/donor.html")
 })
-app.post('/donor', (req, res) => {
+app.post('/donor',  (req, res) => {
 
     // console.log(req.body);
     const {
@@ -120,6 +40,7 @@ app.post('/donor', (req, res) => {
         doctor_id,
         blood_bank_id,
         blood_type,
+        donor_report
     } = req.body;
 
     // Insert into donor table
@@ -133,7 +54,7 @@ app.post('/donor', (req, res) => {
     let id;
     executeQuery(donorQuery, res, (donorResult) => {
         id = donorResult.insertId;
-        // console.log('Inserted donor ID:', id);
+        console.log('Inserted donor ID:', id);
 
         // Now you can use donorId for further operations
 
@@ -141,25 +62,24 @@ app.post('/donor', (req, res) => {
     INSERT INTO blood (blood_bank_id, blood_type, donor_id)
     VALUES ('${blood_bank_id}', '${blood_type}', '${id}');
   `;
-
+     Donorfeedback.create({key:id,report:donor_report})
         // Execute the blood query
         executeQuery(bloodQuery, res);
     });
 
+       
+
+  
 
 });
 
 
 app.get("/patient", (req, res) => {
-    res.sendFile(__dirname + "/patient.html")
+    res.sendFile(__dirname + "/Front-end/patient.html")
 
 })
 
 
-// Update this code inside your /patient route
-
-
-// ... (your existing code)
 
 app.post("/patient", (req, res) => {
 
@@ -220,7 +140,7 @@ app.post("/patient", (req, res) => {
 app.get("/selectDonor", (req, res) => {
     // console.log(req.query);
     temporaryStorage.push(req.query)
-    res.sendFile(__dirname + "/selectDonor.html")
+    res.sendFile(__dirname + "/Front-end/selectDonor.html")
 })
 app.post("/selectDonor", (req, res) => {
     const { donor_id } = req.body;
@@ -280,12 +200,12 @@ res.redirect(`/generateBill?patient_name=${encodeURIComponent(patient_name)}&p_p
 
 app.get("/sendDonor", (req, res) => {
     // Render the sendDonor.html file
-    res.sendFile(path.join(__dirname, 'sendDonor.html'));
+    res.sendFile(path.join(__dirname,'/Front-end/sendDonor.html'));
 });
 
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '/Front-end/index.html');
 });
 
 app.post('/addDoctor', (req, res) => {
@@ -339,6 +259,7 @@ app.get('/getDoctors', (req, res) => {
         res.json(results);
     });
 });
+
 app.get('/getBloodBank', (req, res) => {
     const query = 'SELECT blood_bank_id, blood_bank_name FROM blood_bank';
 
@@ -382,7 +303,7 @@ app.get('/generateBill', (req, res) => {
 
 
     // Render the generateBill.html file with the provided data
-    const generateBillTemplatePath = path.join(__dirname, 'generateBill.html');
+    const generateBillTemplatePath = path.join(__dirname, '/Front-end/generateBill.html');
     const generateBillTemplate = fs.readFileSync(generateBillTemplatePath, 'utf-8');
 
     const generateBillHtml = generateBillTemplate
@@ -401,49 +322,6 @@ app.get('/generateBill', (req, res) => {
     res.send(generateBillHtml);
 });
 
-
-
-
-
-function executeQuery(query, res, callback, retryCount = 3) {
-    pool.getConnection((err, connection) => {
-        if (err) {
-            console.error('Error getting MySQL connection:', err.message);
-            // Retry logic
-            if (retryCount > 0) {
-                console.log(`Retrying (${retryCount} attempts left)`);
-                executeQuery(query, res, callback, retryCount - 1);
-            } else {
-                res.status(500).send('Error getting MySQL connection');
-            }
-            return;
-        }
-
-        connection.query(query, (error, results) => {
-            connection.release(); // Release the connection back to the pool
-
-            if (error) {
-                console.error('Error executing query:', error.message);
-                // Retry logic
-                if (retryCount > 0) {
-                    console.log(`Retrying (${retryCount} attempts left)`);
-                    executeQuery(query, res, callback, retryCount - 1);
-                } else {
-                    res.status(500).send('Error executing query');
-                }
-                return;
-            }
-
-            console.log('Query executed successfully');
-            // Invoke the callback with the results
-            if (typeof callback === 'function') {
-                callback(results);
-            } else if (res) {
-                res.redirect('/');
-            }
-        });
-    });
-}
 
 
 app.listen(port, () => {
