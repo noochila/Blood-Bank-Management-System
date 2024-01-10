@@ -5,9 +5,9 @@ const path = require("path")
 const fs = require('fs');
 const { log } = require('console');
 
-const {Donorfeedback}=require("./mongodb")
+const {Donorfeedback}=require("./DB/mongodb")
 
-const {mysql,pool,executeQuery}=require("./mysql")
+const {mysql,pool,executeQuery}=require("./DB/mysql")
 
 const app = express();
 const port = 3000;
