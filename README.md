@@ -1,6 +1,4 @@
-Got it! If your database is named `mysql`, you can use that name instead. I've adjusted the README accordingly:
 
----
 
 # Blood Donation System
 
