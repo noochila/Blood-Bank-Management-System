@@ -7,11 +7,13 @@ console.log("Successfully connected to mongodb");
   
 })
 
-
-
 const DonorSchema=mongoose.Schema({key:Number,report:String})
 
 const Donorfeedback=mongoose.model("Donor",DonorSchema)
 
 
-module.exports={Donorfeedback}
+const AdminSchema=mongoose.Schema({username:String,password:String})
+const Admin=mongoose.model("admin",AdminSchema)
+
+
+module.exports={Donorfeedback,Admin}

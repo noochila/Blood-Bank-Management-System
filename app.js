@@ -5,7 +5,7 @@ const path = require("path")
 const fs = require('fs');
 const { log } = require('console');
 
-const {Donorfeedback}=require("./DB/mongodb")
+const {Donorfeedback,Admin}=require("./DB/mongodb")
 
 const {mysql,pool,executeQuery}=require("./DB/mysql")
 
@@ -15,10 +15,34 @@ const temporaryStorage = [];
 
 // Use middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json())
+
+// Admin.create({username:"admin",password:"admin"})
 
 
+async function AdminAuth(req,res,next)
+{
+   
+   await Admin.findOne({username:req.body.username,password:req.body.password}).then((data)=>{
 
-app.get("/admin", (req, res) => {
+    if(!data)
+    {
+        res.status(404).json({message:"User not found or Incorrect Password"})
+    }
+     else{
+        next()
+
+     }
+   })
+
+   
+}
+
+app.get("/admin",(req,res)=>{
+    res.sendFile(__dirname+"/Front-end/admin_auth.html")
+})
+
+app.post("/admin",AdminAuth ,(req, res) => {
     res.sendFile(__dirname + "/Front-end/admin.html")
 })
 
@@ -67,9 +91,6 @@ app.post('/donor',  (req, res) => {
         executeQuery(bloodQuery, res);
     });
 
-       
-
-  
 
 });
 
