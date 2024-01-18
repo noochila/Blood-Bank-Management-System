@@ -13,6 +13,9 @@ const app = express();
 const port = 3000;
 const temporaryStorage = [];
 
+app.use(express.static(path.join(__dirname, 'public', 'Front-end')));
+
+
 // Use middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
@@ -39,15 +42,16 @@ async function AdminAuth(req,res,next)
 }
 
 app.get("/admin",(req,res)=>{
-    res.sendFile(__dirname+"/Front-end/admin_auth.html")
+    res.sendFile(path.join(__dirname, "public", "Front-end", "admin_auth.html"));
+
 })
 
 app.post("/admin",AdminAuth ,(req, res) => {
-    res.sendFile(__dirname + "/Front-end/admin.html")
+    res.sendFile(path.join(__dirname, "public", "Front-end", "admin.html"));
 })
 
 app.get("/donor", (req, res) => {
-    res.sendFile(__dirname + "/Front-end/donor.html")
+    res.sendFile(path.join(__dirname, "public", "Front-end", "donor.html"));
 })
 app.post('/donor',  (req, res) => {
 
@@ -96,7 +100,7 @@ app.post('/donor',  (req, res) => {
 
 
 app.get("/patient", (req, res) => {
-    res.sendFile(__dirname + "/Front-end/patient.html")
+    res.sendFile(path.join(__dirname, "public", "Front-end", "patient.html"));
 
 })
 
@@ -161,7 +165,7 @@ app.post("/patient", (req, res) => {
 app.get("/selectDonor", (req, res) => {
     // console.log(req.query);
     temporaryStorage.push(req.query)
-    res.sendFile(__dirname + "/Front-end/selectDonor.html")
+    res.sendFile(path.join(__dirname, "public", "Front-end", "selectDonor.html"));
 })
 app.post("/selectDonor", (req, res) => {
     const { donor_id } = req.body;
@@ -221,12 +225,13 @@ res.redirect(`/generateBill?patient_name=${encodeURIComponent(patient_name)}&p_p
 
 app.get("/sendDonor", (req, res) => {
     // Render the sendDonor.html file
-    res.sendFile(path.join(__dirname,'/Front-end/sendDonor.html'));
+    res.sendFile(path.join(__dirname, "public", "Front-end", "sendDonor.html"));
 });
 
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/Front-end/index.html');
+    res.sendFile(path.join(__dirname, "public", "Front-end", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "Front-end", "index.html"));
 });
 
 app.post('/addDoctor', (req, res) => {
@@ -324,7 +329,7 @@ app.get('/generateBill', (req, res) => {
 
 
     // Render the generateBill.html file with the provided data
-    const generateBillTemplatePath = path.join(__dirname, '/Front-end/generateBill.html');
+    const generateBillTemplatePath = path.join(__dirname, '/public/Front-end/generateBill.html');
     const generateBillTemplate = fs.readFileSync(generateBillTemplatePath, 'utf-8');
 
     const generateBillHtml = generateBillTemplate
