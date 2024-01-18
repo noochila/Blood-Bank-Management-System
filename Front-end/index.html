@@ -1,37 +1,39 @@
+<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-
-    a {
-
-      text-decoration: none;
-      border: 2px solid;
-      color: black;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      background-color: bisque;
-    }
-  </style>
-  <title>Donor and Patient Forms</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Donation System</title>
+    <link rel="stylesheet" href="./CSS/ind.css"> <!-- Add your CSS file link here -->
 </head>
-
 <body>
+    <header>
+        <h1>Welcome to the Blood Donation System</h1>
+        <p>Your one-stop solution for blood donation and requests</p>
+    </header>
 
-  <h1>Choose Form</h1>
+    <main>
+        <section id="options">
+            <h2>Choose an Option</h2>
+            <ul class="lis">
+                <li><a href="./donor.html">Wanna Donate Blood</a></li>
+                <li><a href="./patient.html">In Need of Blood</a></li>
+                <li><a href="./admin_auth.html">Admin Login</a></li>
+            </ul>
+        </section>
 
-  <a href="/donor">Donor Details</a>
-  <a href="/patient">Patient Details</a>
+        <section id="about">
+            <h2>About Us</h2>
+            <p>
+               
+            </p>
+        </section>
+    </main>
 
-
+    <footer>
+        <p>&copy; 2024 Blood Donation System. All rights reserved.</p>
+    </footer>
 </body>
-
 </html>
