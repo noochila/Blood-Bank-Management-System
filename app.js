@@ -455,7 +455,7 @@ app.get('/generateBill', async (req, res) => {
     // Send the generated PDF as the response
     res.end(pdfBuffer);
 
-    res.redirect("/")
+ res.redirect("/")
 
 
     // res.status(500).send('Error generating PDF');
