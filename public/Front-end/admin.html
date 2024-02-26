@@ -13,8 +13,8 @@
     <input type="text" name="doctor_name" id="doctorName" required><br>  
     <label for="doctorAddress">Address:</label>
     <input type="text" name="doc_add" id="doctorAdress" required><br>
-    <label for="doctorPho">Phone Number:</label>
-    <input type="text" name="doc_phno" id="doctorPho" required><br>
+    <label for="doctorPho" pattern="\d{10}" >Phone Number:</label>
+    <input type="number" name="doc_phno" id="doctorPho" required><br>
     
     <button type="submit">Add Doctor</button>
   </form>
@@ -29,4 +29,19 @@
     <button type="submit">Add Donor</button>
   </form>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var numberInput = document.getElementById('doctorPho');
+
+    numberInput.addEventListener('input', function() {
+      if (numberInput.validity.patternMismatch) {
+        numberInput.setCustomValidity('Please enter a 10-digit number.');
+      } else {
+        numberInput.setCustomValidity('');
+      }
+    });
+  });
+</script>
+
+
 </html>

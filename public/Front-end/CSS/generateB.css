@@ -7,6 +7,17 @@ body {
     color: #333;
 }
 
+header {
+    background-color: #070977;
+    padding: 20px;
+    color: #fff;
+    text-align: center;
+}
+
+.logo {
+    max-width: 100px;
+}
+
 h1 {
     color: #1a73e8; /* Blue color for heading */
     margin-bottom: 20px;
@@ -15,10 +26,6 @@ h1 {
 h2 {
     color: #4CAF50; /* Green color for subheadings */
     margin-top: 20px;
-}
-
-p {
-    margin-bottom: 10px;
 }
 
 /* Container styles */
@@ -31,22 +38,12 @@ p {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
 }
 
-/* Button styles */
-.button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.button:hover {
-    background-color: #45a049;
-}
-
 /* Table styles */
+.bill-container {
+    border-left: 4px solid #4CAF50; /* Side border color */
+    padding-left: 10px; /* Adjust the padding as needed */
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -63,5 +60,3 @@ th {
     background-color: #4CAF50;
     color: #fff;
 }
-
-/* Add more styles as needed */

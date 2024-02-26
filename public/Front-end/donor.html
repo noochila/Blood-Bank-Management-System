@@ -11,13 +11,13 @@
 <body>
     <h2>Donor Form</h2>
     <div id="donorForm" class="form-container">
-       
+
         <form action="/donor" method="post">
             <label for="donorName">Donor Name:</label>
             <input type="text" id="donorName" name="donor_name" required><br>
 
             <label for="phoneNo">Phone Number:</label>
-            <input type="text" id="phoneNo" name="phone_no" required><br>
+            <input type="number" id="phoneNo" name="phone_no" pattern="\d{10}" required><br>
 
             <label for="dob">Date of Birth:</label>
             <input type="date" id="dob" name="DOB" required><br>
@@ -57,8 +57,26 @@
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
             </select><br>
-            <label for="donorReport">Donor Report:</label>
-            <input type="text" name="donor_report" id="donorReport" required> <br>
+            <label for="chiefComplaint">Chief Complaint:</label>
+            <textarea id="chiefComplaint" name="chiefComplaint" required></textarea>
+
+            <label for="medicalHistory">Medical History (comma-separated):</label>
+            <textarea id="medicalHistory" name="medicalHistory" required></textarea>
+
+            <label for="badPractices">Bad Practices (comma-separated):</label>
+            <textarea id="badPractices" name="badPractices" required></textarea>
+
+            <label for="meds">Meds (comma-separated):</label>
+            <textarea id="meds" name="meds" required></textarea>
+
+            <label for="allergies">Allergies (comma-separated):</label>
+            <textarea id="allergies" name="allergies"></textarea>
+
+            <label for="familyHistory">Family History (comma-separated):</label>
+            <textarea id="familyHistory" name="familyHistory" required></textarea>
+
+            <label for="socialHistory">Social History:</label>
+            <textarea id="socialHistory" name="socialHistory" required></textarea>
             <button type="submit">Submit</button>
         </form>
 
@@ -66,10 +84,13 @@
 
 
     <script>
+
+
+
         document.addEventListener('DOMContentLoaded', function () {
             // Fetch doctors from the server and populate the dropdown
             fetchDoctors();
-        
+
         });
         document.addEventListener('DOMContentLoaded', function () {
             // Fetch doctors from the server and populate the dropdown        
@@ -97,24 +118,26 @@
         }
         function fetchBloodbank() {
             fetch('/getBloodBank')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Received data:', data);
-                const bloodBankDropdown = document.getElementById('bloodBank');
-                data.forEach(bloodBank => {
-                    const option = document.createElement('option');
-                    option.value = bloodBank.blood_bank_id; // Check property name
-                    option.textContent = bloodBank.blood_bank_name;
-                    bloodBankDropdown.appendChild(option);
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received data:', data);
+                    const bloodBankDropdown = document.getElementById('bloodBank');
+                    data.forEach(bloodBank => {
+                        const option = document.createElement('option');
+                        option.value = bloodBank.blood_bank_id; // Check property name
+                        option.textContent = bloodBank.blood_bank_name;
+                        bloodBankDropdown.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching BloodBank:', error);
                 });
-            })
-            .catch(error => {
-                console.error('Error fetching BloodBank:', error);
-            });
         }
 
 
     </script>
+
+
 
 </body>
 

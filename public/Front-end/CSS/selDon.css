@@ -71,4 +71,54 @@ button {
 
 button:hover {
     background-color: #45a049;
-}
+}.donor-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .donor-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(73, 144, 153, 0.1);
+    margin: 10px;
+    padding: 15px;
+    width: calc(50% - 20px); /* Adjust the percentage width based on your preference */
+    box-sizing: border-box;
+  }
+  
+  @media (max-width: 800px) {
+    .donor-card {
+      width: calc(100% - 20px);
+    }
+  }
+
+  /* ... (your existing styles) */
+  
+  .donor-info {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .donor-detail {
+    flex: 1;
+  }
+  
+  .label {
+    font-weight: bold;
+    color: #4CAF50;
+  }
+  
+  .value {
+    color: #333;
+  }
+  
+  .donor-report {
+    margin-top: 10px;
+  }
+  
+  
+  
+  /* Add more styles as needed */
+  

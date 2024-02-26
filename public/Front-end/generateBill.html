@@ -12,61 +12,65 @@
 <body>
     <div class="container">
 
-    <h1>Bill</h1>
-   
-    <h2>Patient Details</h2>
-    <div id = "bill " class="bill-container">
-    <table>
-        <tr>
-            <td>Name:</td>
-            <td>{{patient_name}}</td>
-        </tr>
-        <tr>
-            <td>Phone Number:</td>
-            <td>{{p_phno}}</td>
-        </tr>
-        <tr>
-            <td>Home Address:</td>
-            <td>{{h_add}}</td>
-        </tr>
-        <tr>
-            <td>Patient Address:</td>
-            <td>{{p_add}}</td>
-        </tr>
-    </table>
+        <header>
+            <!-- Add your organization's logo here -->
+            <img src="./Images/download.png" alt="Organization Logo" class="logo">
+            <h1>VitalCare Health Services Bill</h1>
+        </header>
 
-    <h2>Donor Details</h2>
-    <table>
-        <tr>
-            <td>Name:</td>
-            <td>{{donor_name}}</td>
-        </tr>
-        <tr>
-            <td>Phone Number:</td>
-            <td>{{phone_no}}</td>
-        </tr>
-        <tr>
-            <td>Address:</td>
-            <td>{{donor_address}}</td>
-        </tr>
-    </table>
+        <h2>Patient Details</h2>
+        <div class="bill-container">
+            <table>
+                <tr>
+                    <td>Name:</td>
+                    <td>{{patient_name}}</td>
+                </tr>
+                <tr>
+                    <td>Phone Number:</td>
+                    <td>{{p_phno}}</td>
+                </tr>
+                <tr>
+                    <td>Home Address:</td>
+                    <td>{{h_add}}</td>
+                </tr>
+                <tr>
+                    <td>Patient Address:</td>
+                    <td>{{p_add}}</td>
+                </tr>
+            </table>
+        </div>
 
-    <h2>Blood Details</h2>
-    <table>
-    
-        <tr>
-            <td>Blood Type:</td>
-            <td>{{blood_type}}</td>
-        </tr>
-        <tr>
-            <td>Blood Bank:</td>
-            <td>{{blood_bank_name}}</td>
-        </tr>
-        
-    </table>
-   
-    </div>
-    <button>Print Bill</button>
+        <h2>Donor Details</h2>
+        <div class="bill-container">
+            <table>
+                <tr>
+                    <td>Name:</td>
+                    <td>{{donor_name}}</td>
+                </tr>
+                <tr>
+                    <td>Phone Number:</td>
+                    <td>{{phone_no}}</td>
+                </tr>
+                <tr>
+                    <td>Address:</td>
+                    <td>{{donor_address}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>Blood Details</h2>
+        <div class="bill-container">
+            <table>
+                <tr>
+                    <td>Blood Type:</td>
+                    <td>{{blood_type}}</td>
+                </tr>
+                <tr>
+                    <td>Blood Bank:</td>
+                    <td>{{blood_bank_name}}</td>
+                </tr>
+            </table>
+        </div>
 
     </div>
 </body>
