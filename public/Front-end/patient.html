@@ -62,17 +62,7 @@
                 });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var numberInput = document.getElementById('phoneNo');
-
-            numberInput.addEventListener('input', function () {
-                if (numberInput.validity.patternMismatch) {
-                    numberInput.setCustomValidity('Please enter a 10-digit number.');
-                } else {
-                    numberInput.setCustomValidity('');
-                }
-            });
-        });
+       
 
         document.addEventListener('DOMContentLoaded', function() {
     var numberInput = document.getElementById('phoneNo');
