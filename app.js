@@ -42,7 +42,7 @@ async function AdminAuth(req, res, next) {
 }
 async function query(data) {
     const response = await fetch(
-        "https://api-inference.huggingface.co/models/Falconsai/medical_summarization",
+        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
         {
             headers: { Authorization: "Bearer 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" },
             method: "POST",
@@ -133,7 +133,7 @@ app.post('/donor', async (req, res) => {
             mrn: req.body.phone_no,
             chiefComplaint: req.body.chiefComplaint.split(','),
             medicalHistory: req.body.medicalHistory.split(','),
-            badPractices: req.body.badPractices.split(','),
+            
             meds: req.body.meds.split(','),
             allergies: req.body.allergies.split(','),
             familyHistory: req.body.familyHistory.split(','),
@@ -152,8 +152,7 @@ ${patientData.chiefComplaint.join('\n')}
 **Medical History:**
 ${patientData.medicalHistory.map(item => `- ${item}`).join('\n')}
 
-**Bad Practices:**
-${patientData.badPractices.map(item => `- ${item}`).join('\n')}
+
 
 **Meds:**
 ${patientData.meds.join('\n')}
@@ -448,19 +447,80 @@ app.get('/generateBill', async (req, res) => {
     // Close the browser
     await browser.close();
 
-    // Set Content-Disposition header to prompt download
     res.setHeader('Content-Disposition', 'attachment; filename=bill.pdf');
     res.setHeader('Content-Type', 'application/pdf');
 
     // Send the generated PDF as the response
     res.end(pdfBuffer);
 
- res.redirect("/")
+    // Redirect to the '/' route after sending the PDF
+    res.redirect("/");
 
 
-    // res.status(500).send('Error generating PDF');
+
 
 });
+
+
+
+app.post('/deleteDoctor', (req, res) => {
+    const { doctor_id_to_delete } = req.body;
+    console.log(doctor_id_to_delete);
+    const deleteDoctorQuery = `
+      DELETE FROM doctor
+      WHERE id = ${doctor_id_to_delete}
+    `;
+
+    executeQuery(deleteDoctorQuery, res);
+});
+
+// Delete Blood Bank
+app.post('/deleteBloodBank', (req, res) => {
+    const { blood_bank_id_to_delete } = req.body;
+    console.log(blood_bank_id_to_delete);
+
+    const deleteBloodBankQuery = `
+      DELETE FROM blood_bank
+      WHERE blood_bank_id = ${blood_bank_id_to_delete}
+    `;
+
+    executeQuery(deleteBloodBankQuery, res);
+});
+
+
+// Add these routes after the existing routes
+
+// Get Doctors
+app.get('/getDoctors', (req, res) => {
+    const query = 'SELECT id, doctor_name FROM doctor';
+
+    pool.query(query, (error, results) => {
+        if (error) {
+            console.error('Error fetching doctors:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        res.json(results);
+    });
+});
+
+// Get Blood Banks
+app.get('/getBloodBank', (req, res) => {
+    const query = 'SELECT blood_bank_id, blood_bank_name FROM blood_bank';
+
+    pool.query(query, (error, results) => {
+        if (error) {
+            console.error('Error fetching blood banks:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        res.json(results);
+    });
+});
+
+
 
 
 app.listen(port, () => {
