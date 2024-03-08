@@ -1,5 +1,5 @@
 const express = require('express');
-
+require("dotenv").config()
 const bodyParser = require('body-parser');
 const path = require("path")
 const fs = require('fs');
@@ -44,7 +44,7 @@ async function query(data) {
     const response = await fetch(
         "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
         {
-            headers: { Authorization: "Bearer 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" },
+            headers: { Authorization: "Bearer "+process.env.HUGGING_FACE },
             method: "POST",
             body: JSON.stringify({
                 inputs: data,
@@ -142,9 +142,9 @@ app.post('/donor', async (req, res) => {
 
         // Render the template
         const template = `[Patient Name]: ${patientData.patientName}
-[DOB]: ${patientData.dob}
-[Sex]: ${patientData.sex}
-[MRN]: ${patientData.mrn}
+[Date of Birth]: ${patientData.dob}
+[Gender]: ${patientData.sex}
+[Mobile Number]: ${patientData.mrn}
 
 **Chief Complaint:**
 ${patientData.chiefComplaint.join('\n')}
@@ -524,5 +524,6 @@ app.get('/getBloodBank', (req, res) => {
 
 
 app.listen(port, () => {
+
     console.log(`Server is running on http://localhost:${port}`);
 });
