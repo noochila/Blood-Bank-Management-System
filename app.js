@@ -44,7 +44,7 @@ async function query(data) {
     const response = await fetch(
         "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
         {
-            headers: { Authorization: "Bearer "+process.env.HUGGING_FACE },
+            headers: { Authorization: "Bearer " + process.env.HUGGING_FACE },
             method: "POST",
             body: JSON.stringify({
                 inputs: data,
@@ -133,7 +133,7 @@ app.post('/donor', async (req, res) => {
             mrn: req.body.phone_no,
             chiefComplaint: req.body.chiefComplaint.split(','),
             medicalHistory: req.body.medicalHistory.split(','),
-            
+
             meds: req.body.meds.split(','),
             allergies: req.body.allergies.split(','),
             familyHistory: req.body.familyHistory.split(','),
@@ -434,27 +434,27 @@ app.get('/generateBill', async (req, res) => {
         .replace('{{blood_bank_name}}', blood_bank_name);
 
     // Send the generated HTML as the response
-    // res.send(generateBillHtml);
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+    res.send(generateBillHtml);
+    // const browser = await puppeteer.launch();
+    // const page = await browser.newPage();
 
-    // Set content to the page
-    await page.setContent(generateBillHtml);
+    // // Set content to the page
+    // await page.setContent(generateBillHtml);
 
-    // Generate PDF from the page content
-    const pdfBuffer = await page.pdf();
+    // // Generate PDF from the page content
+    // const pdfBuffer = await page.pdf();
 
-    // Close the browser
-    await browser.close();
+    // // Close the browser
+    // await browser.close();
 
-    res.setHeader('Content-Disposition', 'attachment; filename=bill.pdf');
-    res.setHeader('Content-Type', 'application/pdf');
+    // res.setHeader('Content-Disposition', 'attachment; filename=bill.pdf');
+    // res.setHeader('Content-Type', 'application/pdf');
 
-    // Send the generated PDF as the response
-    res.end(pdfBuffer);
+    // // Send the generated PDF as the response
+    // res.end(pdfBuffer);
 
-    // Redirect to the '/' route after sending the PDF
-    res.redirect("/");
+    // // // Redirect to the '/' route after sending the PDF
+    // res.sendFile(path.join(__dirname, "public", "Front-end", "sendDonor.html"));
 
 
 
@@ -525,5 +525,5 @@ app.get('/getBloodBank', (req, res) => {
 
 app.listen(port, () => {
 
-    console.log(`Server is running on http://localhost:${port}`);
+    console.log(`Server is running on http://localhost:${process.env.PORT || port}`);
 });
