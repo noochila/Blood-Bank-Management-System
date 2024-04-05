@@ -18,14 +18,18 @@ const temporaryStorage = [];
 app.use(express.static(path.join(__dirname, 'public', 'Front-end')));
 
 
+
+
 // Use middleware to parse URL-encoded bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 
-// Admin.create({username:"admin",password:"admin"})
+// Admin.create({username:"test",password:"test123"})
+
 
 
 async function AdminAuth(req, res, next) {
+    
 
     await Admin.findOne({ username: req.body.username, password: req.body.password }).then((data) => {
 
@@ -33,6 +37,7 @@ async function AdminAuth(req, res, next) {
             res.status(404).json({ message: "User not found or Incorrect Password" })
         }
         else {
+            
             next()
 
         }
@@ -42,7 +47,7 @@ async function AdminAuth(req, res, next) {
 }
 async function query(data) {
     const response = await fetch(
-        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
+        "https://api-inference.huggingface.co/models/mdizak/text-summarizer-bart-large-cnn-samsum-rust",
         {
             headers: { Authorization: "Bearer " + process.env.HUGGING_FACE },
             method: "POST",
@@ -102,6 +107,7 @@ app.post('/donor', async (req, res) => {
         doctor_id,
         blood_bank_id,
         blood_type,
+        b_date
 
 
     } = req.body;
@@ -109,9 +115,10 @@ app.post('/donor', async (req, res) => {
     // Insert into donor table
 
     const donorQuery = `
-  INSERT INTO donor (donor_name, phone_no, DOB, gender, address, weight, blood_pressure, iron_content, doctor_id)
-  VALUES ('${donor_name}', '${phone_no}', '${DOB}', '${gender}', '${address}', '${weight}', '${blood_pressure}', '${iron_content}', '${doctor_id}')
-`;
+    INSERT INTO donor (donor_name, phone_no, DOB, gender, address, weight, blood_pressure, iron_content, doctor_id)
+    VALUES ('${donor_name}', '${phone_no}', '${DOB}', '${gender}', '${address}', '${weight}', '${blood_pressure}', '${iron_content}', '${doctor_id}')
+  `;
+  
 
     // executeQuery(donorQuery, res) ;
     let id;
@@ -122,8 +129,8 @@ app.post('/donor', async (req, res) => {
         // Now you can use donorId for further operations
 
         const bloodQuery = `
-    INSERT INTO blood (blood_bank_id, blood_type, donor_id)
-    VALUES ('${blood_bank_id}', '${blood_type}', '${id}');
+    INSERT INTO blood (blood_bank_id, blood_type, donor_id,blood_date)
+    VALUES ('${blood_bank_id}', '${blood_type}', '${id}','${b_date}');
   `;
 
         const patientData = {
@@ -175,8 +182,8 @@ ${patientData.socialHistory}`;
         // Process the Hugging Face API response as needed
         // const processedResult = JSON.stringify(huggingFaceResponse);
 
-        // console.log(processedResult);
-        Donorfeedback.create({ key: id, report: huggingFaceResponse[0].summary_text })
+        console.log(huggingFaceResponse[0].generated_text);
+        Donorfeedback.create({ key: id, report: huggingFaceResponse[0].generated_text })
 
         // Execute the blood query
         executeQuery(bloodQuery, res);
@@ -193,17 +200,24 @@ app.get("/patient", (req, res) => {
 
 
 
-app.post("/patient", (req, res) => {
 
+app.post("/patient", (req, res) => {
     const { patient_name, p_phno, h_add, p_add, blood_type, blood_bank_id } = req.body;
 
-    // Check if the required blood is present in the specified blood bank
+    // Get the date 45 days ago from the current date
+    const fortyFiveDaysAgo = new Date();
+    fortyFiveDaysAgo.setDate(fortyFiveDaysAgo.getDate() - 45);
+    const formattedDate = fortyFiveDaysAgo.toISOString().split('T')[0]; // Format the date as YYYY-MM-DD
+
+    // Check if the required blood is present in the specified blood bank and within the last 45 days
     const checkBloodAvailabilityQuery = `
       SELECT donor.id, donor.donor_name, donor.phone_no, donor.address as donor_address, blood.blood_type, blood_bank.blood_bank_name
       FROM blood
       JOIN donor ON blood.donor_id = donor.id
       JOIN blood_bank ON blood.blood_bank_id = blood_bank.blood_bank_id
-      WHERE blood.blood_type = ? AND blood.blood_bank_id = ?
+      WHERE blood.blood_type = ? 
+      AND blood.blood_bank_id = ? 
+      AND blood.blood_date >= '${formattedDate}'
     `;
 
     pool.query(checkBloodAvailabilityQuery, [blood_type, blood_bank_id], (error, donorResults) => {
@@ -226,9 +240,9 @@ app.post("/patient", (req, res) => {
 
             // Save patient details only when the donor is available
             const savePatientQuery = `
-          INSERT INTO patient (patient_name, p_phno, h_add, p_add)
-          VALUES (?, ?, ?, ?)
-        `;
+                INSERT INTO patient (patient_name, p_phno, h_add, p_add)
+                VALUES (?, ?, ?, ?)
+            `;
 
             pool.query(savePatientQuery, [patient_name, p_phno, h_add, p_add], (savePatientError, savePatientResults) => {
                 if (savePatientError) {
@@ -239,11 +253,10 @@ app.post("/patient", (req, res) => {
 
                 // Redirect to the /selectDonor route with patient and donor details as query parameters
                 res.redirect(`/selectDonor?patient_name=${encodeURIComponent(patient_name)}&p_phno=${encodeURIComponent(p_phno)}&h_add=${encodeURIComponent(h_add)}&p_add=${encodeURIComponent(p_add)}&blood_type=${encodeURIComponent(blood_type)}&donorDetails=${encodeURIComponent(JSON.stringify(donorDetails))}`);
-
             });
         } else {
-            // Blood is not available in the specified blood bank for the required type
-            res.send('Blood not available in the specified blood bank for the required type.');
+            // Blood is not available in the specified blood bank for the required type within the last 45 days
+            res.send('Blood not available in the specified blood bank for the required type within the last 45 days.');
         }
     });
 });
@@ -310,23 +323,45 @@ app.post("/selectDonor", (req, res) => {
 });
 
 
-app.get("/sendDonor", (req, res) => {
-    // Render the sendDonor.html file
-    res.sendFile(path.join(__dirname, "public", "Front-end", "sendDonor.html"));
-});
+// app.get("/sendDonor", (req, res) => {
+//     // Render the sendDonor.html file
+//     res.sendFile(path.join(__dirname, "public", "Front-end", "sendDonor.html"));
+// });
 
-
-app.get('/', (req, res) => {
-
-
-
+function checkAgreement(req, res, next) {
+    // Render the check.html page
     res.sendFile(path.join(__dirname, "public", "Front-end", "index.html"));
+}
+
+// Handle POST request to '/check'
+app.post('/check', (req, res) => {
+    const agreementStatus1 = req.body.agreementStatus1;
+    const agreementStatus2 = req.body.agreementStatus2;
+
+    // Check if the user has agreed to both conditions
+    if (agreementStatus1 && agreementStatus2) {
+        // If both conditions are met, the user can proceed to donate blood
+        res.send({ canDonateBlood: true });
+    } else {
+        // If any condition is not met, the user cannot donate blood
+        res.status(400).send("Sorry, you cannot donate blood.");
+    }
 });
+
+
+
+
+app.get('/', checkAgreement)
+
+app.get('/index',(req,res)=>{
+    res.sendFile(path.join(__dirname, "public", "Front-end", "check.html"));
+})
+
+
+
 
 app.post('/addDoctor', (req, res) => {
     const { doctor_name, doc_add, doc_phno } = req.body;
-
-
 
 
     const query = `
@@ -334,7 +369,8 @@ app.post('/addDoctor', (req, res) => {
     VALUES ('${doctor_name}', '${doc_add}', ${doc_phno})
   `;
 
-    executeQuery(query, res);
+    executeQuery(query, null);
+    res.redirect("/admin")
 
 });
 
@@ -357,7 +393,8 @@ app.post('/bloodbank', (req, res) => {
     );
   `;
 
-    executeQuery(query, res);
+    executeQuery(query, null);
+    res.redirect("/admin")
 
 });
 
@@ -389,7 +426,6 @@ app.get('/getBloodBank', (req, res) => {
     });
 });
 
-// Add this code after your existing routes
 
 app.get('/generateBill', async (req, res) => {
     const {
@@ -413,54 +449,188 @@ app.get('/generateBill', async (req, res) => {
         blood_bank_name
     } = parsedDonorDetails;
 
-    log(req.query)
-    log(parsedDonorDetails)
+    // Get the current date in the format YYYY-MM-DD
+    const currentDate = new Date().toISOString().split('T')[0];
 
+    // Here you should fetch or generate the patient_id, let's assume it's fetched from the database
 
-    // Render the generateBill.html file with the provided data
-    const generateBillTemplatePath = path.join(__dirname, '/public/Front-end/generateBill.html');
-    const generateBillTemplate = fs.readFileSync(generateBillTemplatePath, 'utf-8');
+    // Fetch patient_id from the database or generate it dynamically
+    const patientIdQuery = `
+        SELECT patient_id FROM patient WHERE patient_name = ? AND p_phno = ?
+    `;
 
-    const generateBillHtml = generateBillTemplate
-        .replace('{{patient_name}}', patient_name)
-        .replace('{{p_phno}}', p_phno)
-        .replace('{{h_add}}', h_add)
-        .replace('{{p_add}}', p_add)
-        .replace('{{donor_id}}', donor_id)
-        .replace('{{donor_name}}', donor_name)
-        .replace('{{phone_no}}', phone_no)
-        .replace('{{donor_address}}', donor_address)
-        .replace('{{blood_type}}', blood_type)
-        .replace('{{blood_bank_name}}', blood_bank_name);
+    pool.query(patientIdQuery, [patient_name, p_phno], (error, results) => {
+        if (error) {
+            console.error('Error fetching patient_id:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
 
-    // Send the generated HTML as the response
-    res.send(generateBillHtml);
-    // const browser = await puppeteer.launch();
-    // const page = await browser.newPage();
+        // Extract patient_id from the results if available
+        const patient_id = results.length > 0 ? results[0].patient_id : null;
 
-    // // Set content to the page
-    // await page.setContent(generateBillHtml);
+        if (!patient_id) {
+            console.error('Patient not found or missing patient_id');
+            res.status(404).json({ error: 'Patient not found or missing patient_id' });
+            return;
+        }
 
-    // // Generate PDF from the page content
-    // const pdfBuffer = await page.pdf();
+        // Insert data into the blood_delivery table
+        const insertBloodDeliveryQuery = `
+            INSERT INTO blood_delivery (delivery_date, donor_id, patient_id, blood_type, blood_bank_id)
+            VALUES (?, ?, ?, ?, ?)
+        `;
 
-    // // Close the browser
-    // await browser.close();
+        // Fetch the blood_bank_id based on the blood_bank_name
+        const bloodBankIdQuery = `
+            SELECT blood_bank_id FROM blood_bank WHERE blood_bank_name = ?
+        `;
 
-    // res.setHeader('Content-Disposition', 'attachment; filename=bill.pdf');
-    // res.setHeader('Content-Type', 'application/pdf');
+        pool.query(bloodBankIdQuery, [blood_bank_name], (error, bloodBankResults) => {
+            if (error) {
+                console.error('Error fetching blood_bank_id:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+                return;
+            }
 
-    // // Send the generated PDF as the response
-    // res.end(pdfBuffer);
+            const blood_bank_id = bloodBankResults.length > 0 ? bloodBankResults[0].blood_bank_id : null;
 
-    // // // Redirect to the '/' route after sending the PDF
-    // res.sendFile(path.join(__dirname, "public", "Front-end", "sendDonor.html"));
+            if (!blood_bank_id) {
+                console.error('Blood bank not found or missing blood_bank_id');
+                res.status(404).json({ error: 'Blood bank not found or missing blood_bank_id' });
+                return;
+            }
 
+            // Execute the blood delivery insertion query with blood_type and blood_bank_id
+            pool.query(insertBloodDeliveryQuery, [currentDate, donor_id, patient_id, blood_type, blood_bank_id], (error, results) => {
+                if (error) {
+                    console.error('Error inserting data into blood_delivery table:', error);
+                    res.status(500).json({ error: 'Internal Server Error' });
+                    return;
+                } else {
+                    console.log('Data inserted into blood_delivery table successfully.');
+                    // Proceed with rendering the generateBill.html file with the provided data
 
+                    // Render the generateBill.html file with the provided data
+                    const generateBillTemplatePath = path.join(__dirname, '/public/Front-end/generateBill.html');
+                    const generateBillTemplate = fs.readFileSync(generateBillTemplatePath, 'utf-8');
 
+                    const generateBillHtml = generateBillTemplate
+                        .replace('{{patient_name}}', patient_name)
+                        .replace('{{p_phno}}', p_phno)
+                        .replace('{{h_add}}', h_add)
+                        .replace('{{p_add}}', p_add)
+                        .replace('{{donor_id}}', donor_id)
+                        .replace('{{donor_name}}', donor_name)
+                        .replace('{{phone_no}}', phone_no)
+                        .replace('{{donor_address}}', donor_address)
+                        .replace('{{blood_type}}', blood_type)
+                        .replace('{{blood_bank_name}}', blood_bank_name);
 
+                    // Send the generated HTML as the response
+                    res.send(generateBillHtml);
+                }
+            });
+        });
+    });
 });
 
+
+
+// Route to get the number of blood deliveries for a given month
+app.get('/bloodDeliveriesByMonth/:year/:month', (req, res) => {
+    const { year, month } = req.params;
+
+    // Construct the query to count the number of blood deliveries for the given month
+    const countBloodDeliveriesQuery = `
+        SELECT COUNT(*) AS delivery_count
+        FROM blood_delivery
+        WHERE YEAR(delivery_date) = ? AND MONTH(delivery_date) = ?
+    `;
+
+    // Execute the query
+    pool.query(countBloodDeliveriesQuery, [year, month], (error, results) => {
+        if (error) {
+            console.error('Error counting blood deliveries:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        const deliveryCount = results[0].delivery_count;
+        res.json({ year, month, deliveryCount });
+    });
+});
+
+// Route to get the number of blood deliveries for a given year
+app.get('/bloodDeliveriesByYear/:year', (req, res) => {
+    const { year } = req.params;
+
+    // Construct the query to count the number of blood deliveries for the given year
+    const countBloodDeliveriesQuery = `
+        SELECT COUNT(*) AS delivery_count
+        FROM blood_delivery
+        WHERE YEAR(delivery_date) = ?
+    `;
+
+    // Execute the query
+    pool.query(countBloodDeliveriesQuery, [year], (error, results) => {
+        if (error) {
+            console.error('Error counting blood deliveries:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        const deliveryCount = results[0].delivery_count;
+        res.json({ year, deliveryCount });
+    });
+});
+
+app.get('/bloodDeliveriesByType/:bloodType', (req, res) => {
+    
+    const { bloodType } = req.params;
+    
+
+    // Construct the query to count the number of blood deliveries for the given blood type
+    const countBloodDeliveriesQuery = `
+        SELECT COUNT(*) AS delivery_count
+        FROM blood_delivery
+        WHERE blood_type = ?
+    `;
+
+    // Execute the query
+    pool.query(countBloodDeliveriesQuery, [bloodType], (error, results) => {
+        if (error) {
+            console.error('Error counting blood deliveries:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        const deliveryCount = results[0].delivery_count;
+        res.json({ bloodType, deliveryCount });
+    });
+});
+app.get('/bloodDeliveriesByBloodBank/:bloodBankId', (req, res) => {
+    const { bloodBankId } = req.params;
+
+    // Construct the query to count the number of blood deliveries for the given blood bank
+    const countBloodDeliveriesQuery = `
+        SELECT COUNT(*) AS delivery_count
+        FROM blood_delivery
+        WHERE blood_bank_id = ?
+    `;
+
+    // Execute the query
+    pool.query(countBloodDeliveriesQuery, [bloodBankId], (error, results) => {
+        if (error) {
+            console.error('Error counting blood deliveries:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+            return;
+        }
+
+        const deliveryCount = results[0].delivery_count;
+        res.json({ bloodBankId, deliveryCount });
+    });
+});
 
 
 app.post('/deleteDoctor', (req, res) => {
@@ -471,7 +641,8 @@ app.post('/deleteDoctor', (req, res) => {
       WHERE id = ${doctor_id_to_delete}
     `;
 
-    executeQuery(deleteDoctorQuery, res);
+    executeQuery(deleteDoctorQuery, null);
+    res.redirect("/admin")
 });
 
 // Delete Blood Bank
@@ -484,7 +655,8 @@ app.post('/deleteBloodBank', (req, res) => {
       WHERE blood_bank_id = ${blood_bank_id_to_delete}
     `;
 
-    executeQuery(deleteBloodBankQuery, res);
+    executeQuery(deleteBloodBankQuery, null);
+    res.redirect("/admin")
 });
 
 

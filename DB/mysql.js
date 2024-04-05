@@ -9,7 +9,7 @@ const mysql = require('mysql');
 //   host: '127.0.0.1',
 //   user: 'noob',
 //   password: 'admin@123',
-//   database: 'mysql',
+//   database: 'blood_bank',
 // });
 
 
@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS donor (
 )
 `;
 
+
 const createPatientTableQuery = `
 CREATE TABLE IF NOT EXISTS patient (
   patient_id INT NOT NULL AUTO_INCREMENT,
@@ -68,6 +69,7 @@ CREATE TABLE IF NOT EXISTS blood_bank (
   blood_bank_name VARCHAR(50),
   baddress VARCHAR(255),
   PRIMARY KEY (blood_bank_id)
+  
 )
 `;
 
@@ -77,19 +79,24 @@ CREATE TABLE IF NOT EXISTS blood (
   donor_id INT,
   blood_bank_id INT,
   PRIMARY KEY (donor_id),
+  blood_date DATE,
   FOREIGN KEY (donor_id) REFERENCES donor(id) ON DELETE CASCADE,
   FOREIGN KEY (blood_bank_id) REFERENCES blood_bank(blood_bank_id) ON DELETE CASCADE
 )
 `;
-// const createTableQuery = `
-// CREATE TABLE IF NOT EXISTS blood_delivery (
-//     blood_bank_id INT,
-//     patient_id INT,
-//      PRIMARY KEY (blood_bank_id, patient_id),
-//    FOREIGN KEY (blood_bank_id) REFERENCES blood_bank(blood_bank_id),
-//      FOREIGN KEY (patient_id) REFERENCES patient(patient_id)
-//   )
-// `;
+
+const createBloodDeliveryTableQuery = `
+CREATE TABLE IF NOT EXISTS blood_delivery (
+  delivery_id INT AUTO_INCREMENT PRIMARY KEY,
+  delivery_date DATE,
+  donor_id INT,
+  patient_id INT,
+  blood_type VARCHAR(20),
+  blood_bank_id INT
+)
+`;
+
+
 
 // Execute table creation queries
 executeQuery(createDoctorTableQuery, null, 0);
@@ -97,7 +104,7 @@ executeQuery(createDonorTableQuery, null, 0);
 executeQuery(createBloodBankTableQuery, null, 0);
 executeQuery(createBloodTableQuery, null, 0);
 executeQuery(createPatientTableQuery, null, 0);
-// executeQuery(createTableQuery, null, 0);
+executeQuery(createBloodDeliveryTableQuery, null, 0);
 
 
 
@@ -138,7 +145,7 @@ function executeQuery(query, res, callback, retryCount = 3) {
       if (typeof callback === 'function') {
         callback(results);
       } else if (res) {
-        res.redirect('/');
+        res.redirect('/index');
       }
     });
   });

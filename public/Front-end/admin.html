@@ -10,6 +10,62 @@
 </head>
 
 <body>
+   <!-- Blood Delivery Count by Year -->
+   <h2>Blood Delivery Count by Year</h2>
+   <div class="blood-delivey">
+ 
+     <label for="year">Select Year:</label>
+     <select name="year" id="year">
+       <!-- Options will be populated using JavaScript -->
+     </select>
+     <button onclick="getBloodDeliveriesByYear()">Get Count</button>
+     <p id="yearDeliveryCount">Delivery Count: </p>
+   </div>
+ 
+   <!-- Blood Delivery Count by Month and Year -->
+   <h2>Blood Delivery Count by Month</h2>
+   <div class="blood-delivey">
+     <label for="year">Select Year:</label>
+     <select name="year" id="yearMonth">
+       <!-- Options will be populated using JavaScript -->
+     </select>
+     <label for="month">Select Month:</label>
+     <select name="month" id="month">
+       <!-- Options will be populated using JavaScript -->
+     </select>
+     <button onclick="getBloodDeliveriesByMonth()">Get Count</button>
+     <p id="monthDeliveryCount">Delivery Count: </p>
+   </div>
+ 
+   <h2>Blood Delivery Count by Blood Bank</h2>
+   <div class="blood-delivey">
+     <label for="bloodBank">Select Blood Bank:</label>
+     <select name="bloodBank" id="bloodBank">
+       <!-- Blood bank options will be populated dynamically -->
+     </select>
+     <button onclick="fetchBloodDeliveryCount()">Get Count</button>
+     <p id="bloodBankDeliveryCount">Delivery Count: </p>
+   </div>
+   <h2>Blood Delivery Count by Blood Type</h2>
+ <div class="blood-delivey">
+   <label for="bloodType">Select Blood Type:</label>
+   <select name="bloodType" id="bloodType">
+     <option value="A+">A+</option>
+     <option value="A-">A-</option>
+     <option value="B+">B+</option>
+     <option value="B-">B-</option>
+     <option value="AB+">AB+</option>
+     <option value="AB-">AB-</option>
+     <option value="O+">O+</option>
+     <option value="O-">O-</option>
+   </select>
+   <button onclick="fetchBloodDeliveryCountByType()">Get Count</button>
+   <p id="bloodTypeDeliveryCount">Delivery Count: </p>
+
+ 
+
+ </div>
+
   <h2>Add Doctor</h2>
   <form action="/addDoctor" method="post">
     <label for="doctorName">Doctor Name:</label>
@@ -17,7 +73,8 @@
     <label for="doctorAddress">Address:</label>
     <input type="text" name="doc_add" id="doctorAdress" required><br>
     <label for="doctorPho">Phone Number:</label>
-    <input type="tel"  pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" name="doc_phno" id="doctorPho" required><br>
+    <input type="tel" pattern="[0-9]{10}" title="Please enter a valid 10-digit phone number" name="doc_phno"
+      id="doctorPho" required><br>
 
     <button type="submit">Add Doctor</button>
   </form>
@@ -30,85 +87,247 @@
     <label for="bankAddress">Address: </label>
     <input type="text" name="baddress" id="bankAddress" required><br>
     <button type="submit">Add Blood Bank</button>
-    </form>
+  </form>
 
-    <!-- Delete Blood Bank Section -->
+  <!-- Delete Blood Bank Section -->
 
-    <h2>Delete Doctor</h2>
-    <form action="/deleteDoctor" method="post">
-      <label for="doctorToDelete">Select Doctor to Delete:</label>
-      <select name="doctor_id_to_delete" id="doctorToDelete" required>
-        <!-- Options will be dynamically populated using JavaScript -->
-      </select>
-      <button type="submit">Delete Doctor</button>
-    </form>
+  <h2>Delete Doctor</h2>
+  <form action="/deleteDoctor" method="post">
+    <label for="doctorToDelete">Select Doctor to Delete:</label>
+    <select name="doctor_id_to_delete" id="doctorToDelete" required>
+      <!-- Options will be dynamically populated using JavaScript -->
+    </select>
+    <button type="submit">Delete Doctor</button>
+  </form>
 
-    <!-- Delete Blood Bank Section -->
-    <h2>Delete Blood Bank</h2>
-    <form action="/deleteBloodBank" method="post">
-      <label for="bloodBankToDelete">Select Blood Bank to Delete:</label>
-      <select name="blood_bank_id_to_delete" id="bloodBankToDelete" required>
-        <!-- Options will be dynamically populated using JavaScript -->
-      </select>
-      <button type="submit">Delete Blood Bank</button>
-    </form>
+  <!-- Delete Blood Bank Section -->
+  <h2>Delete Blood Bank</h2>
+  <form action="/deleteBloodBank" method="post">
+    <label for="bloodBankToDelete">Select Blood Bank to Delete:</label>
+    <select name="blood_bank_id_to_delete" id="bloodBankToDelete" required>
+      <!-- Options will be dynamically populated using JavaScript -->
+    </select>
+    <button type="submit">Delete Blood Bank</button>
+    
+  </form>
+  <a href="/index">Go to Home </a>
 
-    <!-- Add this script inside the <head> or at the end of the <body> -->
-    <script>
-      // Function to fetch data from the server
-      async function fetchData(url) {
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            throw new Error(`Error fetching data: ${response.statusText}`);
-          }
-          return response.json();
-        } catch (error) {
-          console.error(error);
-          // Handle error appropriately, e.g., show an error message to the user
+
+  <!-- Add this script inside the <head> or at the end of the <body> -->
+  <script>
+    // Function to fetch data from the server
+    async function fetchData(url) {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Error fetching data: ${response.statusText}`);
         }
+        return response.json();
+      } catch (error) {
+        console.error(error);
+        // Handle error appropriately, e.g., show an error message to the user
       }
+    }
 
-      // Function to populate dropdown with fetched data
-      function populateDropdown1(data, dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
+    // Function to populate dropdown with fetched data
+    function populateDropdown1(data, dropdownId) {
+      const dropdown = document.getElementById(dropdownId);
 
-        // Clear existing options
-        dropdown.innerHTML = '';
+      // Clear existing options
+      dropdown.innerHTML = '';
 
-        // Populate dropdown with data
-        data.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.id; // Use appropriate property based on your data structure
-          option.textContent = item.doctor_name ; // Use appropriate property based on your data structure
-          dropdown.appendChild(option);
-        });
+      // Populate dropdown with data
+      data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id; // Use appropriate property based on your data structure
+        option.textContent = item.doctor_name; // Use appropriate property based on your data structure
+        dropdown.appendChild(option);
+      });
+    }
+    function populateDropdown2(data, dropdownId) {
+      const dropdown = document.getElementById(dropdownId);
+
+      // Clear existing options
+      dropdown.innerHTML = '';
+
+      // Populate dropdown with data
+      data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.blood_bank_id; // Use appropriate property based on your data structure
+        option.textContent = item.blood_bank_name; // Use appropriate property based on your data structure
+        dropdown.appendChild(option);
+      });
+    }
+
+    // Fetch doctors and populate the dropdown
+    fetchData('/getDoctors')
+      .then(doctors => populateDropdown1(doctors, 'doctorToDelete'))
+      .catch(error => console.error('Error fetching doctors:', error));
+
+    // Fetch blood banks and populate the dropdown
+    fetchData('/getBloodBank')
+      .then(bloodBanks => populateDropdown2(bloodBanks, 'bloodBankToDelete'))
+      .catch(error => console.error('Error fetching blood banks:', error));
+
+
+
+    function populateDropdown(data, dropdownId) {
+      const dropdown = document.getElementById(dropdownId);
+
+      // Clear existing options
+      dropdown.innerHTML = '';
+
+      // Populate dropdown with data
+      data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value; // Use appropriate property based on your data structure
+        option.textContent = item.label; // Use appropriate property based on your data structure
+        dropdown.appendChild(option);
+      });
+    }
+
+    // Fetch years and populate the dropdowns
+    async function populateYears() {
+      const currentYear = new Date().getFullYear();
+      const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
+
+      populateDropdown(
+        years.map(year => ({ value: year, label: year })),
+        'year'
+      );
+      populateDropdown(
+        years.map(year => ({ value: year, label: year })),
+        'yearMonth'
+      );
+    }
+
+    // Fetch months and populate the dropdown
+    async function populateMonths() {
+      const months = Array.from({ length: 12 }, (_, i) => i + 1);
+
+      populateDropdown(
+        months.map(month => ({ value: month, label: month })),
+        'month'
+      );
+    }
+
+    // Get blood delivery count by year
+    async function getBloodDeliveriesByYear() {
+      const year = document.getElementById('year').value;
+      try {
+        const response = await fetch(`/bloodDeliveriesByYear/${year}`);
+        if (!response.ok) {
+          throw new Error(`Error fetching data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        document.getElementById('yearDeliveryCount').textContent = `Delivery Count: ${data.deliveryCount}`;
+      } catch (error) {
+        console.error(error);
+        // Handle error appropriately, e.g., show an error message to the user
       }
-      function populateDropdown2(data, dropdownId) {
-        const dropdown = document.getElementById(dropdownId);
+    }
 
-        // Clear existing options
-        dropdown.innerHTML = '';
-
-        // Populate dropdown with data
-        data.forEach(item => {
-          const option = document.createElement('option');
-          option.value = item.blood_bank_id; // Use appropriate property based on your data structure
-          option.textContent =  item.blood_bank_name; // Use appropriate property based on your data structure
-          dropdown.appendChild(option);
-        });
+    // Get blood delivery count by month
+    async function getBloodDeliveriesByMonth() {
+      const year = document.getElementById('yearMonth').value;
+      const month = document.getElementById('month').value;
+      try {
+        const response = await fetch(`/bloodDeliveriesByMonth/${year}/${month}`);
+        if (!response.ok) {
+          throw new Error(`Error fetching data: ${response.statusText}`);
+        }
+        const data = await response.json();
+        document.getElementById('monthDeliveryCount').textContent = `Delivery Count: ${data.deliveryCount}`;
+      } catch (error) {
+        console.error(error);
+        // Handle error appropriately, e.g., show an error message to the user
       }
+    }
 
-      // Fetch doctors and populate the dropdown
-      fetchData('/getDoctors')
-        .then(doctors => populateDropdown1(doctors, 'doctorToDelete'))
-        .catch(error => console.error('Error fetching doctors:', error));
+    async function fetchBloodBanks() {
+    try {
+      const response = await fetch('/getBloodBank');
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error(error);
+      // Handle error appropriately, e.g., show an error message to the user
+    }
+  }
 
-      // Fetch blood banks and populate the dropdown
-      fetchData('/getBloodBank')
-        .then(bloodBanks => populateDropdown2(bloodBanks, 'bloodBankToDelete'))
-        .catch(error => console.error('Error fetching blood banks:', error));
-    </script>
+  // Function to populate dropdown with blood bank data
+  async function populateBloodBankDropdown() {
+    const bloodBankDropdown = document.getElementById('bloodBank');
+
+    // Fetch blood bank data
+    try {
+      const bloodBanks = await fetchBloodBanks();
+
+      // Clear existing options
+      bloodBankDropdown.innerHTML = '';
+
+      // Populate dropdown with blood bank data
+      bloodBanks.forEach(bloodBank => {
+        const option = document.createElement('option');
+        option.value = bloodBank.blood_bank_id;
+        option.textContent = bloodBank.blood_bank_name;
+        bloodBankDropdown.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error populating blood bank dropdown:', error);
+    }
+  }
+
+  // Function to fetch blood delivery count by blood bank ID
+  async function fetchBloodDeliveryCount() {
+    const bloodBankId = document.getElementById('bloodBank').value;
+    try {
+      const response = await fetch(`/bloodDeliveriesByBloodBank/${bloodBankId}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
+      const { deliveryCount } = await response.json();
+
+      // Display delivery count
+      document.getElementById('bloodBankDeliveryCount').textContent = `Delivery Count: ${deliveryCount}`;
+    } catch (error) {
+      console.error(error);
+      // Handle error appropriately, e.g., show an error message to the user
+    }
+  }
+
+  async function fetchBloodDeliveryCountByType() {
+    const bloodType = document.getElementById('bloodType').value;
+    try {
+      const response = await fetch(`/bloodDeliveriesByType/${bloodType}`);
+      if (!response.ok) {
+        throw new Error(`Error fetching data: ${response.statusText}`);
+      }
+      const { deliveryCount } = await response.json();
+
+      // Display delivery count
+      document.getElementById('bloodTypeDeliveryCount').textContent = `Delivery Count: ${deliveryCount}`;
+    } catch (error) {
+      console.error(error);
+      // Handle error appropriately, e.g., show an error message to the user
+    }
+  }
+ 
+
+    // Initialize the page
+    (async function () {
+      await populateYears();
+      await populateMonths();
+      await populateBloodBankDropdown();
+    })();
+
+
+    // Call function to populate blood bank dropdown when the page loads
+
+
+  </script>
 </body>
 
 

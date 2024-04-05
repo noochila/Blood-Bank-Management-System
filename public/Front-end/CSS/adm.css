@@ -54,3 +54,18 @@ body {
     background-color: #45a049;
   }
   
+  .blood-delivey{
+    margin-bottom: 40px;
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #fff; /* White background for forms */
+    padding: 20px;
+    border-radius: 8px;
+    font-size:20px;
+    font-family:  Arial, Helvetica, sans-serif;
+    font-weight:bold;
+    text-emphasis-color: green;
+    box-shadow: 0 0 10px rgba(73, 144, 153, 0.1); /* Add a subtle shadow */
+    width: 600px; /* Adjusted width for the form */
+    margin-right: auto; /* Align the form to the left */
+  }
