@@ -6,13 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Donor Form</title>
     <link rel="stylesheet" href="./CSS/don.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 
 <body>
     <h2>Donor Form</h2>
     <div id="donorForm" class="form-container">
 
-        <form action="/donor" method="post">
+        <form action="/donor" method="post" id="donorForm">
             <label for="donorName">Donor Name:</label>
             <input type="text" id="donorName" name="donor_name" required><br>
 
@@ -25,10 +26,9 @@
 
             <label for="gender">Gender:</label>
             <select id="gender" name="gender" required>
-                <option value="M">Male</option>
-                <option value="F">Female</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
             </select><br>
-
 
             <label for="address">Address:</label>
             <input type="text" id="address" name="address" required><br>
@@ -69,8 +69,6 @@
             <label for="medicalHistory">Medical History (comma-separated):</label>
             <textarea id="medicalHistory" name="medicalHistory" required rows="2" cols="70"></textarea>
 
-
-
             <label for="meds">Meds (comma-separated):</label>
             <textarea id="meds" name="meds" required rows="2" cols="70"></textarea>
 
@@ -82,33 +80,23 @@
 
             <label for="socialHistory">Social History:</label>
             <textarea id="socialHistory" name="socialHistory" required rows="2" cols="70"></textarea>
-            <button type="submit">Submit</button>
+            <button type="submit" id="submitBtn">Submit</button>
         </form>
 
     </div>
 
-
     <script>
-
-
-
         document.addEventListener('DOMContentLoaded', function () {
             // Fetch doctors from the server and populate the dropdown
             fetchDoctors();
-
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            // Fetch doctors from the server and populate the dropdown        
             fetchBloodbank();
         });
 
         // Function to fetch doctors and populate the dropdown
         function fetchDoctors() {
-            // Fetch doctors from the server
             fetch('/getDoctors')
                 .then(response => response.json())
                 .then(data => {
-                    // Populate the dropdown with doctors
                     const doctorDropdown = document.getElementById('doctor');
                     data.forEach(doctor => {
                         const option = document.createElement('option');
@@ -121,15 +109,15 @@
                     console.error('Error fetching doctors:', error);
                 });
         }
+
         function fetchBloodbank() {
             fetch('/getBloodBank')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Received data:', data);
                     const bloodBankDropdown = document.getElementById('bloodBank');
                     data.forEach(bloodBank => {
                         const option = document.createElement('option');
-                        option.value = bloodBank.blood_bank_id; // Check property name
+                        option.value = bloodBank.blood_bank_id;
                         option.textContent = bloodBank.blood_bank_name;
                         bloodBankDropdown.appendChild(option);
                     });
@@ -138,6 +126,7 @@
                     console.error('Error fetching BloodBank:', error);
                 });
         }
+
         function validateDOB() {
             var dobInput = document.getElementById("dob").value;
             var dob = new Date(dobInput);
@@ -154,6 +143,7 @@
             }
             return true;
         }
+
         function validateWeight() {
             var weight = parseFloat(document.getElementById("weight").value);
             if (isNaN(weight) || weight <= 0 || weight > 200) {
@@ -195,9 +185,34 @@
             return true;
         }
 
+        document.getElementById('donorForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+
+            // Show an alert
+            alert('Thank you for your submission! Your certificate will be downloaded.');
+
+            // Generate and download the certificate
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const donorName = document.getElementById('donorName').value;
+
+            doc.setFontSize(22);
+            doc.text("Certificate of Appreciation", 20, 30);
+            doc.setFontSize(16);
+            doc.text(`This certificate is awarded to`, 20, 50);
+            doc.setFontSize(20);
+            doc.text(donorName, 20, 70);
+            doc.setFontSize(16);
+            doc.text(`in recognition of their generous blood donation.`, 20, 90);
+            doc.text(`Thank you for your contribution to saving lives.`, 20, 110);
+
+            doc.save('certificate.pdf');
+
+            // Submit the form after generating the PDF
+            event.target.submit();
+        });
     </script>
-
-
 
 </body>
 
