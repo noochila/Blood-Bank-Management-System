@@ -4,22 +4,22 @@ const mysql = require('mysql');
 
 
 
-// const pool = mysql.createPool({
-//   connectionLimit: 10,
-//   host: '127.0.0.1',
-//   user: 'noob',
-//   password: 'admin@123',
-//   database: 'blood_bank',
-// });
-
-
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: process.env.HOST,
-  user: process.env.USER,
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE,
+  host: 'localhost',
+  user: 'root',
+  password: 'root',
+  database: 'blood_donation',
 });
+
+
+// const pool = mysql.createPool({
+//   connectionLimit: 10,
+//   host: process.env.HOST,
+//   user: process.env.USER,
+//   password: process.env.PASSWORD,
+//   database: process.env.DATABASE,
+// });
 
 
 

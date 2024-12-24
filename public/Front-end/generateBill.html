@@ -1,5 +1,3 @@
-<!-- bill.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bill</title>
     <link rel="stylesheet" href="./CSS/generateB.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
 
         <header>
-            <!-- Add your organization's logo here -->
             <img src="./Images/download.png" alt="Organization Logo" class="logo">
             <h1>VitalCare Health Services Bill</h1>
         </header>
@@ -74,6 +72,32 @@
 
     </div>
 
+    <button id="downloadPdf">Download PDF</button>
     <a href="/index">Go to Home </a>
+
+    <script>
+        document.getElementById('downloadPdf').addEventListener('click', function () {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("VitalCare Health Services Bill", 10, 10);
+            doc.text("Patient Details", 10, 20);
+            doc.text("Name: {{patient_name}}", 10, 30);
+            doc.text("Phone Number: {{p_phno}}", 10, 40);
+            doc.text("Home Address: {{h_add}}", 10, 50);
+            doc.text("Patient Address: {{p_add}}", 10, 60);
+
+            doc.text("Donor Details", 10, 70);
+            doc.text("Name: {{donor_name}}", 10, 80);
+            doc.text("Phone Number: {{phone_no}}", 10, 90);
+            doc.text("Address: {{donor_address}}", 10, 100);
+
+            doc.text("Blood Details", 10, 110);
+            doc.text("Blood Type: {{blood_type}}", 10, 120);
+            doc.text("Blood Bank: {{blood_bank_name}}", 10, 130);
+
+            doc.save('bill.pdf');
+        });
+    </script>
 </body>
 </html>

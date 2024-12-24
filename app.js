@@ -24,7 +24,7 @@ app.use(express.static(path.join(__dirname, 'public', 'Front-end')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 
-// Admin.create({username:"test",password:"test123"})
+Admin.create({username:"test",password:"test123"})
 
 
 
@@ -182,8 +182,15 @@ ${patientData.socialHistory}`;
         // Process the Hugging Face API response as needed
         // const processedResult = JSON.stringify(huggingFaceResponse);
 
-        console.log(huggingFaceResponse[0].generated_text);
-        Donorfeedback.create({ key: id, report: huggingFaceResponse[0].generated_text })
+       // console.log(huggingFaceResponse[0].generated_text);
+        //Donorfeedback.create({ key: id, report: huggingFaceResponse[0].generated_text })
+
+        if (huggingFaceResponse && huggingFaceResponse[0] && huggingFaceResponse[0].generated_text) {
+            Donorfeedback.create({ key: id, report: huggingFaceResponse[0].generated_text });
+        } else {
+            console.error("Invalid response from Hugging Face API");
+        }
+        
 
         // Execute the blood query
         executeQuery(bloodQuery, res);
